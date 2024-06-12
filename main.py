@@ -5,6 +5,7 @@ from pathlib import Path
 
 import networkx as nx
 import matplotlib.pyplot as plt
+from pyvis.network import Network
 
 
 class DependencyParser():
@@ -89,9 +90,9 @@ class DependencyParser():
 class DependencyVisualizer:
     def __init__(self, dependecies) -> None:
         self.dependencies = dependecies
-        self.graph = nx.Graph()
 
     def plot(self):
+        self.graph = nx.Graph()
         color_map = []
 
         nodes = set()
@@ -116,6 +117,39 @@ class DependencyVisualizer:
         nx.draw(self.graph, node_color=color_map, with_labels=True)
         plt.show()
 
+    def plot_interactive(self):
+        self.graph = nx.Graph()
+        color_map = []
+
+        nodes = set()
+        for directory in self.dependencies:
+            self.graph.add_node(directory)
+            if directory not in nodes:
+                color_map.append("red")
+            nodes.add(directory)
+            for file in self.dependencies[directory]:
+                self.graph.add_edge(directory, file)
+                self.graph.add_node(file)
+                if file not in nodes:
+                    color_map.append("orange")
+                nodes.add(file)
+                for dep in self.dependencies[directory][file]:
+                    self.graph.add_edge(file, dep)
+                    self.graph.add_node(dep)
+                    if dep not in nodes:
+                        color_map.append("yellow")
+                    nodes.add(dep)
+
+        net = Network(
+            notebook=False,
+            directed = False,
+            select_menu = True,
+            filter_menu = True,
+        )
+        net.show_buttons()
+        net.from_nx(self.graph)
+        net.save_graph('graph.html')
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -130,5 +164,5 @@ if __name__ == "__main__":
     print(json.dumps(dp.get_dependencies(), indent=2))
 
     dv = DependencyVisualizer(dp.get_dependencies())
-    dv.plot()
+    dv.plot_interactive()
 
