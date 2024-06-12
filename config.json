@@ -1,0 +1,13 @@
+{
+    "ignore_dirs": [
+        "venv"
+    ],
+    "ignore_stdlib": true,
+    "ignore_libs": [
+        "matplotlib",
+        "pandas",
+        "scipy",
+        "numba",
+        "numpy"
+    ]
+}
